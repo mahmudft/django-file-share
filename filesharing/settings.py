@@ -165,11 +165,15 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
+#static path
 STATIC_URL = '/static/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'static')
-CRISPY_TEMPLATE_PACK = 'bootstrap4'
-REDIRECT_LOGUT_URL = '/'
+#files path
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-#WhiteNOise Storage BAckend
+#WhiteNoise Storage BAckend
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+#crispy forms
+CRISPY_TEMPLATE_PACK = 'bootstrap4'
+#redirect logout
+REDIRECT_LOGUT_URL = '/'
