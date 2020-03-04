@@ -1,0 +1,5 @@
+CREATE DATABASE main_db;
+CREATE DATABASE logs;
+
+GRANT ALL PRIVILEGES ON DATABASE "main_db" to postgres;
+GRANT ALL PRIVILEGES ON DATABASE "logs" to postgres;

@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <meta http-equiv="x-ua-compatible" content="ie=edge"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+    {% load static %}
+    <link rel="stylesheet" href="{% static 'css/bootstrap.min.css' %}">
+    <script src="{% static 'js/jquery-3.4.1.slim.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.min.js' %}"></script>
+</head>
+<body>
+{% load crispy_forms_tags %}
+<div class="container"
+     style="margin: 3em; padding-left: 10rem; padding-right: 10rem; padding-bottom: 1rem; padding-top: 1rem">
+    <div style="padding: 1rem; width: 10em; justify-content: center; align-items: center; margin-left: auto; margin-right: auto; font-family: 'Odibee Sans', cursive; font-size: xx-large; color: #003366">
+        Django File Share
+    </div>
+    <form method="POST" class="form-group">
+        {% csrf_token %}
+        {{ form|crispy }}
+        <button class="btn btn-success">Sign up</button>
+    </form>
+    <div>If you have an account , <a href="{% url 'login' %}">Login</a></div>
+</div>
+</body>
+</html>

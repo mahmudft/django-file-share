@@ -1,0 +1,131 @@
+{% extends 'base.html' %}
+{% block main %}
+    {% load guardian_tags %}
+    {% load event_tags %}
+    {% get_obj_perms request.user for result as 'perfile_perm' %}
+    {% if "justview_upload" or "fullview_upload" in perfile_perm %}
+        <div class="container">
+        <div class="row">
+            <div class="col-md-8 card mb-4  mt-3 left  top">
+                <div class="card-body">
+                    <h1>{{ result.file.url|splitdbl }}</h1>
+                    <a class="button" href='{{ MEDIA_URL }}{{ result.file.name }}'>Download</a>
+                    <p class=" text-muted">{{ result.author }} | {{ result.uploaded_at }}</p>
+                    <p class="card-text ">{{ result.description | safe }}</p>
+                </div>
+            </div>
+        </div>
+    {% else %}
+        <blockquote style="color: #4f20b5; font-size: xx-large; justify-content: center">Access denied</blockquote>
+    {% endif %}
+<br/>
+<div class="container">
+    <div class="row">
+        <div class="col-md-8 card mb-4  mt-3 left  top">
+            {% if "fullview_upload" in perfile_perm %}
+                <form id="formData" method="POST">
+                    {% csrf_token %}
+                    <input type="hidden" id="myuseraccount" value="{{ request.user.username }}">
+                    <div class="form-group">
+                        <label for="comment">Comment:</label>
+                        <textarea class="form-control" rows="3" cols="10" id="comment"></textarea>
+                    </div>
+                    <button id="formButton" class="btn btn-primary mb-2">Add</button>
+                </form>
+            {% endif %}
+            <br/>
+            {% if "fullview_upload" in perfile_perm %}
+            <hr>
+            Comments
+            <hr>
+            <div class="ui comments" id="commentsection">
+                {% for comment in comments %}
+                    <div class="comment">
+                        <div class="content">
+                            <a class="author">{{ comment.author }}</a>
+                            <div class="text">
+                                {{ comment.text }}
+                            </div>
+                            <div class="actions">
+                                {% if request.user == comment.file_id.author %}
+                                    <a class="buttondel"
+                                       href="{% url 'deletecomment' uuid=comment.file_id.file_id id=comment.id %}">Delete</a>
+                                {% elif request.user == comment.author %}
+                                    <a class="buttondel"
+                                       href="{% url 'deletecomment' uuid=comment.file_id.file_id id=comment.id %}">Delete</a>
+                                {% endif %}
+                                {% if request.user == comment.author %}
+                                    <a id="togleshow" href="#">Edit</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <form id="changeform" method="POST"
+                              action="{% url 'editcomment' uuid=comment.file_id.file_id id=comment.id %}">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <label for="comment">Comment:</label>
+                                <textarea name="textedarea" class="form-control" rows="3" cols="10" id="comment"></textarea>
+                            </div>
+                            <button id="changeformbutton" class="btn btn-primary mb-2">Change</button>
+                        </form>
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
+        </div>
+    </div>
+</div>
+<script>
+    var myusernamecur = $("#myuseraccount").val()
+    var uuid = '{{ result.file_id }}';
+    var loc = window.location;
+    var wsStart = 'ws://';
+    if (loc.protocol == 'https:') {
+        wsStart = 'wss://'
+    }
+    var endpoint = wsStart + loc.host + loc.pathname;
+    var socket = new ReconnectingWebSocket(endpoint);
+    socket.debug = true;
+
+    socket.onopen = function (e) {
+        console.log("message", e);
+    };
+
+    socket.onmessage = function (e) {
+        var data = JSON.parse(e.data);
+        var message = data['message'];
+        var user = data['username'];
+        var material = `<div class="comment"> <div class="content"><a class="author">${user}</a><div class="text">${message}</div></div></div>`;
+        $("#commentsection").prepend(material);
+
+    };
+
+    document.querySelector('#comment').focus();
+    document.querySelector('#comment').onkeyup = function (e) {
+        if (e.keyCode === 13) {  // enter, return
+            document.querySelector('#formButton').click();
+        }
+    };
+    document.querySelector('#formButton').onclick = function (e) {
+        e.preventDefault();
+        var messageInputDom = document.querySelector('#comment');
+        var message = messageInputDom.value;
+        var username = myusernamecur;
+        socket.send(JSON.stringify({
+            'message': message,
+            'uuid': uuid,
+            'username': username
+        }));
+        messageInputDom.value = '';
+    };
+    socket.onclose = function (e) {
+        console.error('Chat socket closed unexpectedly', e);
+    };
+    $(document).ready(function () {
+        $("#togleshow").click(function () {
+            $("#changeform").toggle();
+        });
+    });
+</script>
+
+{% endblock %}
