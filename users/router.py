@@ -6,7 +6,7 @@ class UsersRouter:
         if model._meta.app_label == 'users':
             return 'logs'
 
-        return None
+        return 'main_db'
 
     def db_for_write(self, model, **hints):
         """
@@ -14,7 +14,7 @@ class UsersRouter:
         """
         if model._meta.app_label == 'users':
             return 'logs'
-        return None
+        return 'main_db'
 
     def allow_relation(self, obj1, obj2, **hints):
         """
@@ -27,8 +27,7 @@ class UsersRouter:
 
     def allow_migrate(self, db, app_label, model_name=None, **hints):
         """
-        Make sure the auth app only appears in the 'users_db'
-        database.
+        logs
         """
         if app_label == 'users':
             return db == 'logs'
